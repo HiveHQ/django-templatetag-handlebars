@@ -8,11 +8,8 @@ setup(
     version='1.3.2.dev0',
     author='Mathieu Leplatre',
     author_email='mathieu.leplatre@makina-corpus.com',
-    url='https://github.com/makinacorpus/django-templatetag-handlebars',
-    download_url="http://pypi.python.org/pypi/django-templatetag-handlebars/",
+    url='https://github.com/HiveHQ/django-templatetag-handlebars',
     description="Easily embed Handlebars.js templates in your django templates",
-    long_description=open(os.path.join(here, 'README.rst')).read() + '\n\n' +
-                     open(os.path.join(here, 'CHANGES')).read(),
     license='LPGL, see LICENSE file.',
     install_requires=['django'],
     packages=find_packages(),

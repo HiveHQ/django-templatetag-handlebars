@@ -1,6 +1,7 @@
 from django import template
 from django.conf import settings
 from django.utils import six
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -98,7 +99,7 @@ def verbatim(parser, token):
 
 @register.simple_tag
 def handlebars_js():
-    return """<script src="%shandlebars.js"></script>""" % settings.STATIC_URL
+    return mark_safe('<script src="%shandlebars.js"></script>' % settings.STATIC_URL)
 
 
 class HandlebarsNode(VerbatimNode):
@@ -127,10 +128,10 @@ class HandlebarsNode(VerbatimNode):
             id_attr, script_type = 'id', 'text/x-handlebars-template'
         head_script = '<script type="%s" %s="%s">' % (script_type, id_attr,
                                                       self.template_id)
-        return """
+        return mark_safe("""
         %s
         %s
-        </script>""" % (head_script, output)
+        </script>""" % (head_script, output))
 
 
 @register.tag
