@@ -35,14 +35,14 @@ def verbatim_tags(parser, token, endtagname):
         if token.contents == endtagname:
             break
 
-        if token.token_type == template.base.TOKEN_VAR:
-            text_and_nodes.append('{{')
+        if token.token_type == template.base.TokenType.VAR:
+            text_and_nodes.append("{{")
             text_and_nodes.append(token.contents)
 
-        elif token.token_type == template.base.TOKEN_TEXT:
+        elif token.token_type == template.base.TokenType.TEXT:
             text_and_nodes.append(token.contents)
 
-        elif token.token_type == template.base.TOKEN_BLOCK:
+        elif token.token_type == template.base.TokenType.BLOCK:
             try:
                 command = token.contents.split()[0]
             except IndexError:
@@ -59,8 +59,8 @@ def verbatim_tags(parser, token, endtagname):
                     raise
             text_and_nodes.append(node)
 
-        if token.token_type == template.base.TOKEN_VAR:
-            text_and_nodes.append('}}')
+        if token.token_type == template.base.TokenType.VAR:
+            text_and_nodes.append("}}")
 
     return text_and_nodes
 
@@ -77,6 +77,7 @@ class VerbatimNode(template.Node):
             {% trans "Your name is" %} {{first}} {{last}}
         {% endverbatim %}
     """
+
     def __init__(self, text_and_nodes):
         self.text_and_nodes = text_and_nodes
 
@@ -93,7 +94,7 @@ class VerbatimNode(template.Node):
 
 @register.tag
 def verbatim(parser, token):
-    text_and_nodes = verbatim_tags(parser, token, 'endverbatim')
+    text_and_nodes = verbatim_tags(parser, token, "endverbatim")
     return VerbatimNode(text_and_nodes)
 
 
@@ -116,27 +117,34 @@ class HandlebarsNode(VerbatimNode):
         {% endtplhandlebars %}
 
     """
+
     def __init__(self, template_id, text_and_nodes):
         super(HandlebarsNode, self).__init__(text_and_nodes)
         self.template_id = template_id
 
     def render(self, context):
         output = super(HandlebarsNode, self).render(context)
-        if getattr(settings, 'USE_EMBER_STYLE_ATTRS', False) is True:
-            id_attr, script_type = 'data-template-name', 'text/x-handlebars'
+        if getattr(settings, "USE_EMBER_STYLE_ATTRS", False) is True:
+            id_attr, script_type = "data-template-name", "text/x-handlebars"
         else:
-            id_attr, script_type = 'id', 'text/x-handlebars-template'
-        head_script = '<script type="%s" %s="%s">' % (script_type, id_attr,
-                                                      self.template_id)
-        return mark_safe("""
+            id_attr, script_type = "id", "text/x-handlebars-template"
+        head_script = '<script type="%s" %s="%s">' % (
+            script_type,
+            id_attr,
+            self.template_id,
+        )
+        return mark_safe(
+            """
         %s
         %s
-        </script>""" % (head_script, output))
+        </script>"""
+            % (head_script, output)
+        )
 
 
 @register.tag
 def tplhandlebars(parser, token):
-    text_and_nodes = verbatim_tags(parser, token, endtagname='endtplhandlebars')
+    text_and_nodes = verbatim_tags(parser, token, endtagname="endtplhandlebars")
     # Extract template id from token
     tokens = token.split_contents()
     stripquote = lambda s: s[1:-1] if s[:1] == '"' else s
@@ -144,5 +152,6 @@ def tplhandlebars(parser, token):
         tag_name, template_id = map(stripquote, tokens[:2])
     except ValueError:
         raise template.TemplateSyntaxError(
-            "%s tag requires exactly one argument" % token.split_contents()[0])
+            "%s tag requires exactly one argument" % token.split_contents()[0]
+        )
     return HandlebarsNode(template_id, text_and_nodes)
