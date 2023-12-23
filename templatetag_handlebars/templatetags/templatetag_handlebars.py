@@ -1,6 +1,5 @@
 from django import template
 from django.conf import settings
-from django.utils import six
 from django.utils.safestring import mark_safe
 
 register = template.Library()
@@ -85,7 +84,7 @@ class VerbatimNode(template.Node):
         output = ""
         # If its text we concatenate it, otherwise it's a node and we render it
         for bit in self.text_and_nodes:
-            if isinstance(bit, six.string_types):
+            if isinstance(bit, str):
                 output += bit
             else:
                 output += bit.render(context)
