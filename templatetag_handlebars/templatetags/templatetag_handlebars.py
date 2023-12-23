@@ -30,7 +30,7 @@ def verbatim_tags(parser, token, endtagname):
     """
     text_and_nodes = []
     while 1:
-        token = parser.tokens.pop(0)
+        token = parser.next_token()
         if token.contents == endtagname:
             break
 
