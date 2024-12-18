@@ -1,5 +1,6 @@
 from django import template
 from django.conf import settings
+from django.template.loader_tags import IncludeNode
 from django.utils.safestring import mark_safe
 
 register = template.Library()
@@ -87,14 +88,23 @@ class VerbatimNode(template.Node):
             if isinstance(bit, str):
                 output += bit
             else:
+                if isinstance(bit, IncludeNode):
+                    # Set origin if it's not already set
+                    if not hasattr(bit, "origin"):
+                        bit.origin = (
+                            context.template.origin
+                            if hasattr(context, "template")
+                            else None
+                        )
                 output += bit.render(context)
         return output
 
 
-@register.tag
-def verbatim(parser, token):
-    text_and_nodes = verbatim_tags(parser, token, "endverbatim")
-    return VerbatimNode(text_and_nodes)
+# NOTE: DON'T NEED verbatim tag anymore cause rolled into Django
+# @register.tag
+# def verbatim(parser, token):
+#     text_and_nodes = verbatim_tags(parser, token, "endverbatim")
+#     return VerbatimNode(text_and_nodes)
 
 
 @register.simple_tag
